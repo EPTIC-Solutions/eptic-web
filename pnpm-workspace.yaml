@@ -9,6 +9,10 @@ catalog:
   vite-plus: 1.4.0
 overrides:
   vite@*: "catalog:"
+  # Security patches for transitive deps (both only run at build time)
+  postcss-selector-parser@<6.1.5: ">=6.1.5 <7"
+  satori@<0.33.5: ">=0.33.5 <0.34"
+  fflate@>=0.7.0 <0.7.5: ">=0.7.5 <0.8"
 peerDependencyRules:
   allowAny:
     - vite
