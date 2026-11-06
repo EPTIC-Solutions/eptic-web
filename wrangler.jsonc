@@ -18,20 +18,17 @@
   "workers_dev": true,
   /**
    * Custom Domains: Cloudflare owns each hostname's DNS record and TLS cert and
-   * points it at this Worker. A hostname can only be attached once any existing
-   * DNS record for it has been deleted in the dashboard.
-   * Cutover is one host at a time; uncomment each as it moves off Hetzner.
+   * points it at this Worker. A hostname can only be attached once any other
+   * A/AAAA/CNAME record for it has been deleted in the dashboard.
    */
   "routes": [
-    { "pattern": "banners.eptic.ro", "custom_domain": true },
+    { "pattern": "www.eptic.ro", "custom_domain": true },
+    { "pattern": "eptic.ro", "custom_domain": true },
     { "pattern": "start.eptic.ro", "custom_domain": true },
-    // Temporary Worker Routes: these hostnames still have leftover proxied DNS
-    // records (AAAA/CNAME). Switch them to custom_domain once those are deleted.
-    { "pattern": "www.eptic.ro/*", "zone_name": "eptic.ro" },
-    { "pattern": "eptic.ro/*", "zone_name": "eptic.ro" },
-    { "pattern": "terminal.eptic.ro/*", "zone_name": "eptic.ro" },
-    { "pattern": "epticgames.com/*", "zone_name": "epticgames.com" },
-    { "pattern": "www.epticgames.com/*", "zone_name": "epticgames.com" },
+    { "pattern": "banners.eptic.ro", "custom_domain": true },
+    { "pattern": "terminal.eptic.ro", "custom_domain": true },
+    { "pattern": "epticgames.com", "custom_domain": true },
+    { "pattern": "www.epticgames.com", "custom_domain": true },
   ],
   /**
    * Secrets (not committed):
