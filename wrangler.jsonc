@@ -12,6 +12,8 @@
     "enabled": true,
   },
   "upload_source_maps": true,
+  // Static files (incl. pre-rendered banners) are readable from the Worker as env.ASSETS.
+  "assets": { "binding": "ASSETS" },
   // Keeps the <name>.<account>.workers.dev URL for testing before DNS cutover.
   "workers_dev": true,
   /**

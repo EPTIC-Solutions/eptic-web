@@ -34,6 +34,15 @@ Tooling is [Vite+](https://viteplus.dev) (`vp`): Vite + Rolldown for builds, Oxl
 | `pnpm check`     | Generates route/Worker types, then `vp check` (format + lint + type check) |
 | `pnpm check:fix` | Same, and auto-fixes formatting/lint                                       |
 
+### Why some things happen at build time
+
+The Workers free plan allows ~10 ms of CPU per request, so:
+
+- **Banners** are rendered to PNGs by `scripts/render-banners.mjs` (widths in `app/sites/banners/widths.ts`); `/tokyo.png?w=N` serves the smallest pre-rendered width ≥ N.
+- **Repos**: `scripts/snapshot-repos.mjs` saves the GitHub list as a fallback for when the live API call is rate-limited.
+
+On the `*.workers.dev` preview URL, add `?site=start` or `?site=banners` to view the other sites.
+
 esbuild is still installed because `wrangler` depends on it, but nothing in the build uses it.
 
 ## Deploy (Cloudflare Workers, free plan)

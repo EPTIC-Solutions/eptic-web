@@ -28,10 +28,37 @@ async function fetchAccount(account: string): Promise<GitHubRepo[]> {
   return res.json();
 }
 
+/** If GitHub is failing, serve the snapshot and don't retry for this long. */
+const FALLBACK_CACHE_SECONDS = 300;
+
+/** Repo list saved at build time by scripts/snapshot-repos.mjs. */
+async function loadSnapshot(): Promise<Repo[]> {
+  try {
+    const res = await env.ASSETS.fetch("https://assets.local/data/repos.json");
+    return res.ok ? await res.json() : [];
+  } catch {
+    return [];
+  }
+}
+
+function remember(cache: Cache, repos: Repo[], seconds: number) {
+  waitUntil(
+    cache.put(
+      CACHE_KEY,
+      new Response(JSON.stringify(repos), {
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": `public, max-age=${seconds}`,
+        },
+      }),
+    ),
+  );
+}
+
 /**
  * Public repos of both accounts, newest first. Cached for an hour in the
- * Cloudflare edge cache; on failure returns an empty list instead of
- * breaking the page.
+ * Cloudflare edge cache. If GitHub fails, falls back to the build-time
+ * snapshot (cached for 5 minutes so we don't keep hammering GitHub).
  */
 export async function getRepos(): Promise<Repo[]> {
   const cache = (caches as unknown as { default: Cache }).default;
@@ -50,20 +77,12 @@ export async function getRepos(): Promise<Repo[]> {
         language,
       }));
 
-    waitUntil(
-      cache.put(
-        CACHE_KEY,
-        new Response(JSON.stringify(repos), {
-          headers: {
-            "Content-Type": "application/json",
-            "Cache-Control": `public, max-age=${CACHE_SECONDS}`,
-          },
-        }),
-      ),
-    );
+    remember(cache, repos, CACHE_SECONDS);
     return repos;
   } catch (error) {
-    console.error("Failed to load GitHub repos", error);
-    return [];
+    console.warn("GitHub repos unavailable, using build snapshot:", String(error));
+    const snapshot = await loadSnapshot();
+    remember(cache, snapshot, FALLBACK_CACHE_SECONDS);
+    return snapshot;
   }
 }
