@@ -17,17 +17,20 @@
   // Keeps the <name>.<account>.workers.dev URL for testing before DNS cutover.
   "workers_dev": true,
   /**
-   * Custom Domains: Cloudflare creates the DNS records and TLS certs for these.
-   * Requires the eptic.ro and epticgames.com zones to be on this Cloudflare account.
+   * Worker Routes: the Worker answers requests on these hostnames before they
+   * reach the origin. Each hostname needs a *proxied* (orange cloud) DNS record;
+   * its target IP is never contacted while the route exists.
+   * Cutover is one host at a time; uncomment each as it moves off Hetzner.
+   * Rollback for a host = comment it out and redeploy.
    */
   "routes": [
-    { "pattern": "www.eptic.ro", "custom_domain": true },
-    { "pattern": "eptic.ro", "custom_domain": true },
-    { "pattern": "start.eptic.ro", "custom_domain": true },
-    { "pattern": "banners.eptic.ro", "custom_domain": true },
-    { "pattern": "terminal.eptic.ro", "custom_domain": true },
-    { "pattern": "epticgames.com", "custom_domain": true },
-    { "pattern": "www.epticgames.com", "custom_domain": true },
+    { "pattern": "banners.eptic.ro/*", "zone_name": "eptic.ro" },
+    // { "pattern": "start.eptic.ro/*", "zone_name": "eptic.ro" },
+    // { "pattern": "www.eptic.ro/*", "zone_name": "eptic.ro" },
+    // { "pattern": "eptic.ro/*", "zone_name": "eptic.ro" },
+    // { "pattern": "terminal.eptic.ro/*", "zone_name": "eptic.ro" },
+    // { "pattern": "epticgames.com/*", "zone_name": "epticgames.com" },
+    // { "pattern": "www.epticgames.com/*", "zone_name": "epticgames.com" },
   ],
   /**
    * Secrets (not committed):
