@@ -140,17 +140,22 @@ export const commands: Record<string, Command> = {
 
       const offset = 2;
       for (const repo of ctx.repos) {
-        const description = repo.full_name.includes("/eptic.ro")
-          ? "The website you are currently on."
-          : repo.description;
+        const description =
+          repo.full_name === "EPTIC-Solutions/eptic-web"
+            ? "The website you are currently on."
+            : repo.description;
 
+        // Pinned repos (listed first) get a ★ in the indent, so names stay aligned.
         ctx.write(
           text(
-            <A href={repo.html_url} color="highlight">
-              {repo.full_name}
-            </A>,
+            <>
+              {repo.pinned && <C color="secondary">★ </C>}
+              <A href={repo.html_url} color="highlight">
+                {repo.full_name}
+              </A>
+            </>,
             {
-              offset,
+              offset: repo.pinned ? offset - 2 : offset,
               status: repo.language ?? undefined,
               statusColor: "secondary",
             },
