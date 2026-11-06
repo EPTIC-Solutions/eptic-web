@@ -40,5 +40,16 @@ export function siteForHost(hostname: string): Site {
 }
 
 export function siteForRequest(request: Request): Site {
-  return siteForHost(new URL(request.url).hostname);
+  const url = new URL(request.url);
+
+  // On the *.workers.dev preview URL every site shares one hostname, so allow
+  // `?site=start` / `?site=banners` there for testing. Ignored on real domains.
+  if (url.hostname.endsWith(".workers.dev")) {
+    const override = url.searchParams.get("site");
+    if (override === "terminal" || override === "start" || override === "banners") {
+      return override;
+    }
+  }
+
+  return siteForHost(url.hostname);
 }
