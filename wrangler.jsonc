@@ -25,11 +25,13 @@
   "routes": [
     { "pattern": "banners.eptic.ro", "custom_domain": true },
     { "pattern": "start.eptic.ro", "custom_domain": true },
-    // { "pattern": "www.eptic.ro", "custom_domain": true },
-    // { "pattern": "eptic.ro", "custom_domain": true },
-    // { "pattern": "terminal.eptic.ro", "custom_domain": true },
-    // { "pattern": "epticgames.com", "custom_domain": true },
-    // { "pattern": "www.epticgames.com", "custom_domain": true },
+    // Temporary Worker Routes: these hostnames still have leftover proxied DNS
+    // records (AAAA/CNAME). Switch them to custom_domain once those are deleted.
+    { "pattern": "www.eptic.ro/*", "zone_name": "eptic.ro" },
+    { "pattern": "eptic.ro/*", "zone_name": "eptic.ro" },
+    { "pattern": "terminal.eptic.ro/*", "zone_name": "eptic.ro" },
+    { "pattern": "epticgames.com/*", "zone_name": "epticgames.com" },
+    { "pattern": "www.epticgames.com/*", "zone_name": "epticgames.com" },
   ],
   /**
    * Secrets (not committed):
