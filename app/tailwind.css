@@ -1,0 +1,14 @@
+@import "tailwindcss" source(".");
+
+@plugin "@tailwindcss/typography";
+
+/* Tailwind v4 changed the default border color; keep the v3 look. */
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+}

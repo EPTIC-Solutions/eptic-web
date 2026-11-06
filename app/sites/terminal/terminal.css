@@ -1,0 +1,160 @@
+:root {
+  font-family: cursor, monospace;
+  line-height: 24px;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+
+  --color-default: #519975;
+  --color-secondary: #b89076;
+  --color-highlight: #646cff;
+  --color-error: #ba3035;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+  text-decoration: underline;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+#app {
+  margin: 0 auto;
+  padding: 0.5rem;
+}
+
+p {
+  margin-block-end: 0;
+  margin-block-start: 0;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+}
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}
+
+#line {
+  display: flex;
+  color: #519975;
+  align-items: center;
+}
+
+#line > #command-input {
+  white-space: pre;
+  margin-left: 1ch;
+}
+
+#line > #cursor {
+  font-size: 16px;
+  color: #73abad;
+  background-color: #73abad;
+  position: relative;
+  opacity: 1;
+  width: 10px;
+  height: 22px;
+  overflow: hidden;
+  text-indent: -5px;
+  display: inline-block;
+  text-decoration: blink;
+  animation: blinker 1s linear infinite;
+  animation: blinker 1s step-end infinite;
+}
+
+#app.loading {
+  display: none;
+}
+
+#loader .loader::before {
+  content: "";
+  color: #ffffff;
+  animation: loader 0.5s infinite;
+}
+
+@keyframes loader {
+  0% {
+    content: "⣾";
+  }
+  14.5% {
+    content: "⣽";
+  }
+  30% {
+    content: "⣻";
+  }
+  42% {
+    content: "⢿";
+  }
+  56% {
+    content: "⡿";
+  }
+  71% {
+    content: "⣟";
+  }
+  85% {
+    content: "⣯";
+  }
+  100% {
+    content: "⣷";
+  }
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.color-default {
+  color: var(--color-default);
+}
+
+.color-secondary {
+  color: var(--color-secondary);
+}
+
+.color-highlight {
+  color: var(--color-highlight);
+}
+
+.color-error {
+  color: var(--color-error);
+}
+
+.command-container {
+  white-space: pre-wrap;
+  max-width: 715px;
+  line-height: 1.3em;
+  display: flex;
+  margin: 0;
+  padding: 0;
+  font-size: 16px;
+}
+
+.command-container:has(.command-line-text.wide) {
+  max-width: none;
+}
+
+.command-container > .command-line-text {
+  flex-grow: 1;
+}

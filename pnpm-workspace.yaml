@@ -1,0 +1,16 @@
+# Only workerd (Cloudflare's local runtime) needs its install script.
+# esbuild is pulled in by wrangler but never used by our build (Vite+ uses Rolldown/Oxc),
+# and its native binary still arrives via @esbuild/<platform>, so skip its postinstall.
+allowBuilds:
+  esbuild: false
+  workerd: true
+catalog:
+  vite: npm:@voidzero-dev/vite-plus-core@1.4.0
+  vite-plus: 1.4.0
+overrides:
+  vite@*: "catalog:"
+peerDependencyRules:
+  allowAny:
+    - vite
+  allowedVersions:
+    vite: "*"

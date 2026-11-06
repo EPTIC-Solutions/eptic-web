@@ -1,0 +1,34 @@
+/**
+ * One Worker serves every EPTIC hostname. Host -> site mapping and redirects
+ * live in app/sites.ts.
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "eptic-web",
+  "compatibility_date": "2026-11-04",
+  "main": "./workers/app.ts",
+  "observability": {
+    "enabled": true,
+  },
+  "upload_source_maps": true,
+  // Keeps the <name>.<account>.workers.dev URL for testing before DNS cutover.
+  "workers_dev": true,
+  /**
+   * Custom Domains: Cloudflare creates the DNS records and TLS certs for these.
+   * Requires the eptic.ro and epticgames.com zones to be on this Cloudflare account.
+   */
+  "routes": [
+    { "pattern": "www.eptic.ro", "custom_domain": true },
+    { "pattern": "eptic.ro", "custom_domain": true },
+    { "pattern": "start.eptic.ro", "custom_domain": true },
+    { "pattern": "banners.eptic.ro", "custom_domain": true },
+    { "pattern": "terminal.eptic.ro", "custom_domain": true },
+    { "pattern": "epticgames.com", "custom_domain": true },
+    { "pattern": "www.epticgames.com", "custom_domain": true },
+  ],
+  /**
+   * Secrets (not committed):
+   *   wrangler secret put GITHUB_TOKEN   # optional, avoids GitHub API rate limits for `repos`
+   */
+}
