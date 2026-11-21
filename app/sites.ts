@@ -24,6 +24,14 @@ export const redirects: Record<string, { to: string; status: 301 | 302 }> = {
 };
 
 /**
+ * releases.eptic.ro/<path> serves install scripts proxied from GitHub, so a
+ * merged script change goes live without redeploying this Worker.
+ */
+export const releaseScripts: Record<string, string> = {
+  "/ru.sh": "https://raw.githubusercontent.com/wizzymore/ru/master/install.sh",
+};
+
+/**
  * Resolve which site a request is for.
  *
  * Unknown hosts (localhost, *.workers.dev previews) fall back to the first

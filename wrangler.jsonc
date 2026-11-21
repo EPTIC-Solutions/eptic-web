@@ -27,6 +27,7 @@
     { "pattern": "start.eptic.ro", "custom_domain": true },
     { "pattern": "banners.eptic.ro", "custom_domain": true },
     { "pattern": "terminal.eptic.ro", "custom_domain": true },
+    { "pattern": "releases.eptic.ro", "custom_domain": true },
     { "pattern": "epticgames.com", "custom_domain": true },
     { "pattern": "www.epticgames.com", "custom_domain": true },
   ],
