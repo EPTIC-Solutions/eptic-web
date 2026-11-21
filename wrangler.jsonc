@@ -16,6 +16,8 @@
   "assets": { "binding": "ASSETS" },
   // Keeps the <name>.<account>.workers.dev URL for testing before DNS cutover.
   "workers_dev": true,
+  // Required by `wrangler preview`, which Workers Builds runs for non-production branches.
+  "previews": {},
   /**
    * Custom Domains: Cloudflare owns each hostname's DNS record and TLS cert and
    * points it at this Worker. A hostname can only be attached once any other
