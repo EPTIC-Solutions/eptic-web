@@ -1,5 +1,5 @@
 import { createRequestHandler } from "react-router";
-import { redirects } from "../app/sites";
+import { redirects, releaseScripts } from "../app/sites";
 
 const requestHandler = createRequestHandler(
   () => import("virtual:react-router/server-build"),
@@ -14,6 +14,19 @@ export default {
     const redirect = redirects[url.hostname];
     if (redirect) {
       return Response.redirect(`${redirect.to}${url.pathname}${url.search}`, redirect.status);
+    }
+
+    if (url.hostname === "releases.eptic.ro") {
+      const source = releaseScripts[url.pathname];
+      if (!source) return new Response("Not found\n", { status: 404 });
+      const upstream = await fetch(source, { cf: { cacheTtl: 300, cacheEverything: true } });
+      if (!upstream.ok) return new Response("Script unavailable\n", { status: 502 });
+      return new Response(upstream.body, {
+        headers: {
+          "content-type": "text/x-shellscript; charset=utf-8",
+          "cache-control": "public, max-age=300",
+        },
+      });
     }
 
     return requestHandler(request);
