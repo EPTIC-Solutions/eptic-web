@@ -1,4 +1,5 @@
 import type { Repo } from "~/lib/github.server";
+import { detectOs, type LatestRelease } from "~/lib/reelhouse";
 import { banner } from "./banner";
 import { A, br, C, text, type OutputLine } from "./output";
 
@@ -59,6 +60,177 @@ const socials = [
   },
 ];
 
+/** releases.eptic.ro in production; the same origin in development. */
+const releasesOrigin = () =>
+  location.hostname.endsWith("eptic.ro") ? "https://releases.eptic.ro" : "";
+
+async function latestReelhouse(): Promise<LatestRelease | null> {
+  try {
+    const res = await fetch(`${releasesOrigin()}/reelhouse/latest.json`);
+    const data = (await res.json()) as Partial<LatestRelease>;
+    return res.ok && data.version ? (data as LatestRelease) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Apple Silicon or Intel, when the browser lets us tell. */
+async function macArch(): Promise<"arm64" | "intel" | null> {
+  const uaData = (
+    navigator as {
+      userAgentData?: {
+        getHighEntropyValues?: (h: string[]) => Promise<{ architecture?: string }>;
+      };
+    }
+  ).userAgentData;
+  try {
+    const { architecture } = (await uaData?.getHighEntropyValues?.(["architecture"])) ?? {};
+    if (architecture === "arm") return "arm64";
+    if (architecture === "x86") return "intel";
+  } catch {}
+  try {
+    const gl = document.createElement("canvas").getContext("webgl");
+    const info = gl?.getExtension("WEBGL_debug_renderer_info");
+    const renderer = info ? String(gl!.getParameter(info.UNMASKED_RENDERER_WEBGL)) : "";
+    if (/Apple M\d/.test(renderer)) return "arm64";
+    if (/Intel|AMD|Radeon/.test(renderer)) return "intel";
+  } catch {}
+  return null;
+}
+
+/** Start a download without leaving the page (the file is sent as an attachment). */
+function startDownload(url: string) {
+  const a = document.createElement("a");
+  a.href = url;
+  a.rel = "noreferrer";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+const PRODUCTS = {
+  reelhouse: {
+    label: "Reelhouse",
+    what: "the Reelhouse app",
+    after: "Install it and open it: it finds your Reelhouse server on the network.",
+  },
+  "reelhouse-server": {
+    label: "Reelhouse Server",
+    what: "the Reelhouse media server",
+    after: "Open it and it runs in the menu bar / system tray. It updates itself.",
+  },
+} as const;
+
+async function downloadReelhouse(name: keyof typeof PRODUCTS, ctx: CommandContext) {
+  const product = PRODUCTS[name];
+  const os = detectOs(navigator);
+  if (os.kind === "mobile") {
+    ctx.write(
+      text(`${product.label} is for computers (macOS and Windows); it isn't available on mobile.`, {
+        color: "error",
+      }),
+    );
+    return;
+  }
+  if (os.kind === "linux") {
+    ctx.write(
+      text(`${product.label} isn't available for Linux yet, only macOS and Windows.`, {
+        color: "error",
+      }),
+    );
+    return;
+  }
+  if (os.kind === "other") {
+    ctx.write(
+      text(`Couldn't tell which OS this is. ${product.label} is available for macOS and Windows.`, {
+        color: "error",
+      }),
+    );
+    return;
+  }
+
+  ctx.write(text("Looking up the latest version…", { color: "secondary" }));
+  const release = await latestReelhouse();
+  if (!release) {
+    ctx.write(
+      text("Couldn't reach the release server, or nothing is published yet. Try again later.", {
+        color: "error",
+      }),
+    );
+    return;
+  }
+
+  // The file for this computer, plus the other choices worth showing.
+  let url: string | undefined;
+  let platform: string;
+  const others: { label: string; url?: string }[] = [];
+  if (name === "reelhouse") {
+    platform = os.kind === "macos" ? "macOS" : "Windows";
+    url = os.kind === "macos" ? release.downloads.app.macos : release.downloads.app.windows;
+  } else if (os.kind === "windows") {
+    platform = "Windows";
+    url = release.downloads.server["windows-x64"];
+  } else {
+    const arch = await macArch();
+    const intel = arch === "intel";
+    platform = intel ? "macOS (Intel)" : "macOS (Apple Silicon)";
+    url = intel ? release.downloads.server["macos-intel"] : release.downloads.server["macos-arm64"];
+    others.push(
+      intel
+        ? { label: "Apple Silicon Mac?", url: release.downloads.server["macos-arm64"] }
+        : { label: "Intel Mac?", url: release.downloads.server["macos-intel"] },
+    );
+  }
+
+  if (!url) {
+    ctx.write(
+      text(`${product.label} v${release.version} has no ${platform} package yet.`, {
+        color: "error",
+      }),
+    );
+    return;
+  }
+
+  ctx.write(br());
+  ctx.write(
+    text(
+      <>
+        Downloading {product.what} <C color="highlight">v{release.version}</C> for {platform}…
+      </>,
+    ),
+  );
+  startDownload(url);
+  ctx.write(
+    text(
+      <>
+        If it doesn't start,{" "}
+        <A href={url} color="highlight">
+          click here
+        </A>
+        .
+      </>,
+      { color: "secondary", offset: 2 },
+    ),
+  );
+  for (const o of others) {
+    if (o.url) {
+      ctx.write(
+        text(
+          <>
+            {o.label}{" "}
+            <A href={o.url} color="highlight">
+              Download that one instead
+            </A>
+            .
+          </>,
+          { color: "secondary", offset: 2 },
+        ),
+      );
+    }
+  }
+  ctx.write(text(product.after, { color: "secondary", offset: 2 }));
+}
+
 export const commands: Record<string, Command> = {
   banner: {
     description: "Display the header.",
@@ -116,6 +288,22 @@ export const commands: Record<string, Command> = {
         ctx.write(text(name, { status: commands[name]!.description, statusColor: "highlight" }));
       }
       ctx.write(br());
+    },
+  },
+
+  reelhouse: {
+    description: "Download the Reelhouse app for this computer.",
+    run(args, ctx) {
+      if (!noArgs("reelhouse", args, ctx)) return;
+      void downloadReelhouse("reelhouse", ctx);
+    },
+  },
+
+  "reelhouse-server": {
+    description: "Download the Reelhouse media server for this computer.",
+    run(args, ctx) {
+      if (!noArgs("reelhouse-server", args, ctx)) return;
+      void downloadReelhouse("reelhouse-server", ctx);
     },
   },
 

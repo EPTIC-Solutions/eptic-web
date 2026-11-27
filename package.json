@@ -7,6 +7,7 @@
     "build": "node scripts/render-banners.mjs && node scripts/snapshot-repos.mjs && vp build",
     "preview": "pnpm build && vp preview",
     "check": "wrangler types && react-router typegen && vp check",
+    "test": "vp test run",
     "check:fix": "wrangler types && react-router typegen && vp check --fix",
     "postinstall": "wrangler types && react-router typegen",
     "deploy": "pnpm build && wrangler deploy",

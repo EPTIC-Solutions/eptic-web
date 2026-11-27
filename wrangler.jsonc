@@ -33,6 +33,8 @@
   ],
   /**
    * Secrets (not committed):
-   *   wrangler secret put GITHUB_TOKEN   # optional, avoids GitHub API rate limits for `repos`
+   *   wrangler secret put GITHUB_TOKEN             # optional, avoids GitHub API rate limits for `repos`
+   *   wrangler secret put REELHOUSE_GITHUB_TOKEN   # fine-grained, read-only Contents on wizzymore/reelhouse;
+   *                                                # serves Reelhouse downloads/updates (workers/reelhouse.ts)
    */
 }
