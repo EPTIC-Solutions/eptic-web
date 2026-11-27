@@ -17,6 +17,7 @@ const assets = [
   "Reelhouse-Server-0.2.0-macos-intel.app.tar.gz",
   "reelhouse-server-0.2.0-macos-intel.tar.gz",
   "reelhouse-server-0.2.0-windows-x64.zip",
+  "Reelhouse-Server-0.2.0-windows-x64-setup.exe",
   "SHA256SUMS",
 ].map((name) => ({ name, size: 1 }));
 
@@ -46,6 +47,13 @@ describe("asset matching", () => {
     );
     expect(findAsset(assets, UPDATES.server["macos-arm64-app"])?.name).toBe(
       "Reelhouse-Server-0.2.0-macos-arm64.app.tar.gz",
+    );
+    // Windows: people download the installer; installs update from the zip.
+    expect(findAsset(assets, DOWNLOADS.server["windows-x64"])?.name).toBe(
+      "Reelhouse-Server-0.2.0-windows-x64-setup.exe",
+    );
+    expect(findAsset(assets, UPDATES.server["windows-x64-cli"])?.name).toBe(
+      "reelhouse-server-0.2.0-windows-x64.zip",
     );
   });
 });

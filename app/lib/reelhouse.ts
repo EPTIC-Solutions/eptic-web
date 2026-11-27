@@ -14,7 +14,8 @@ export const DOWNLOADS = {
   server: {
     "macos-arm64": /^Reelhouse-Server-.+-macos-arm64\.dmg$/,
     "macos-intel": /^Reelhouse-Server-.+-macos-intel\.dmg$/,
-    "windows-x64": /^reelhouse-server-.+-windows-x64\.zip$/,
+    // The installer (since 0.1.2); the .zip stays the self-update package.
+    "windows-x64": /^Reelhouse-Server-.+-windows-x64-setup\.exe$/,
   },
 } as const;
 
